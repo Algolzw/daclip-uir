@@ -1,0 +1,43 @@
+name: universal-ir
+suffix: ~  # add suffix to saved images
+model: denoising
+distortion: [motion-blurry,hazy,jpeg-compressed,low-light,noisy,raindrop,rainy,shadowed,snowy,uncompleted] # uncompleted means inpainting
+gpu_ids: [0]
+
+sde:
+  max_sigma: 50
+  T: 100
+  schedule: cosine # linear, cosine
+  eps: 0.005
+  
+degradation:
+  # for denoising
+  sigma: 25
+  noise_type: G # Gaussian noise: G
+
+  # for super-resolution
+  scale: 4
+
+datasets:
+  test1:
+   name: Test
+   mode: LQGT
+   dataroot_GT: datasets/universal/deg_type/GT
+   dataroot_LQ: datasets/universal/deg_type/LQ
+  
+#### network structures
+network_G:
+  which_model_G: ConditionalUNet
+  setting:
+    in_nc: 3
+    out_nc: 3
+    nf: 64
+    ch_mult: [1, 2, 4, 4]
+    context_dim: 512
+    use_degra_context: true
+    use_image_context: true
+
+#### path
+path:
+  pretrain_model_G: pretrained/universal-ir.pth
+  daclip: pretrained/daclip_ViT-B-32.pt

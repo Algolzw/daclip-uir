@@ -115,4 +115,11 @@ If you have any question, please contact: ziwei.luo@it.uu.se
 
 
 #### --- Thanks for your interest! --- ####
+
+<details>
+<summary>statistics</summary>
+
 ![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)
+
+</details>
+

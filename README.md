@@ -86,17 +86,23 @@ python test.py -opt=options/test.yml
 
 <details>
 <summary><strong>Degradation-Specific Restoration</strong> (click to expand) </summary>
+
 ![daclip](figs/results_single.jpg)
+
 </details>
 
 <details>
 <summary><strong>Unified Image Restoration</strong> (click to expand) </summary>
+
 ![daclip](figs/results-UIR.jpg)
+
 </details>
 
 <details>
 <summary><strong>Radar Results</strong> (click to expand) </summary>
+
 ![daclip](figs/UIR_results_radar.jpg)
+
 </details>
 
 ---
@@ -109,4 +115,4 @@ If you have any question, please contact: ziwei.luo@it.uu.se
 
 
 #### --- Thanks for your interest! --- ####
-<!--![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)-->
+![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)

@@ -1,7 +1,7 @@
 
-## Controlling Vision-Language Models for Universal Image Restoration <br><sub>Official PyTorch Implementations of [<sub>DA-CLIP</sub>](). </sub>
+## Controlling Vision-Language Models for Universal Image Restoration <br><sub>Official PyTorch Implementations of [<sub>DA-CLIP</sub>](https://arxiv.org/abs/2310.01018) </sub>
 
-[[Project Page](https://algolzw.github.io/daclip-uir/index.html)] | [[Paper]()]
+[Project Page](https://algolzw.github.io/daclip-uir) | [Paper](https://arxiv.org/abs/2310.01018)
 
 ![daclip](figs/teaser.jpg)
 
@@ -47,6 +47,9 @@ datasets/universal/train
 datasets/universal/val
 ...
 
+#### for clean captions ####
+datasets/universal/daclip_train.csv
+datasets/universal/daclip_val.csv
 ```
 
 Then get into the `codes/config/daclip-sde` directory and modify the dataset paths in option files in `options/train.yml` and `options/tes.yml`. 
@@ -54,7 +57,12 @@ Then get into the `codes/config/daclip-sde` directory and modify the dataset pat
 You can add more tasks or datasets to both `train` and `val` directories and add the degradation word to `distortion`.
 
 
-### Train
+### Training
+
+#### DA-CLIP 
+(Coming soon...)
+
+#### Universal Image Restoration
 The main code for training is in `codes/config/daclip-sde` and the core network for DA-CLIP is in `codes/open_clip/daclip_model.py`.
 
 * Put the pretrained [**DA-CLIP weights**](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) to `pretrained` directory and check the `daclip` path.
@@ -75,7 +83,7 @@ The models and training logs will save in `log/universal-ir`.
 You can print your log at time by running `tail -f log/universal-ir/train_universal-ir_***.log -n 100`.
 
 ### Evaluation
-To evalute our method, please modify the benchmark path and model path and run
+To evalute our method on image restoration, please modify the benchmark path and model path and run
 
 ```bash
 cd codes/config/universal-ir
@@ -119,7 +127,7 @@ If you have any question, please contact: ziwei.luo@it.uu.se
 <details>
 <summary>statistics</summary>
 
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)
+<!--![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)-->
 
 </details>
 

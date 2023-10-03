@@ -1,5 +1,5 @@
 
-## Controlling Vision-Language Models for Universal Image Restoration <br><sub>Official PyTorch Implementations of [<sub>DA-CLIP</sub>](https://arxiv.org/abs/2310.01018) </sub>
+## Controlling Vision-Language Models for Universal Image Restoration <br><sub>Official PyTorch Implementation of DA-CLIP. </sub>
 
 [Project Page](https://algolzw.github.io/daclip-uir) | [Paper](https://arxiv.org/abs/2310.01018)
 

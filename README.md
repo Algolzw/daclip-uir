@@ -43,7 +43,7 @@ text = tokenizer(degradations)
 with torch.no_grad(), torch.cuda.amp.autocast():
     text_features = model.encode_text(text)
     image_features, degra_features = model.encode_image(image, control=True)
-    degra_features /= degra_features(dim=-1, keepdim=True)
+    degra_features /= degra_features.norm(dim=-1, keepdim=True)
     text_features /= text_features.norm(dim=-1, keepdim=True)
 
     text_probs = (100.0 * degra_features @ text_features.T).softmax(dim=-1)

@@ -5,6 +5,9 @@
 
 ![daclip](figs/teaser.jpg)
 
+### Overview framework:
+
+![daclip](figs/overview.jpg)
 
 ## How to Run the Code?
 
@@ -20,6 +23,34 @@ pip install -r requirements.txt
 
 ```
 
+### DA-CLIP Usage
+
+Get into the `universal-image-restoration` directory and run:
+
+```python
+import torch
+from PIL import Image
+import open_clip
+
+checkpoint = 'pretrained/daclip_ViT-B-32.pt'
+model, preprocess = open_clip.create_model_from_pretrained('daclip_ViT-B-32', pretrained=checkpoint)
+tokenizer = open_clip.get_tokenizer('ViT-B-32')
+
+image = preprocess(Image.open("haze_01.png")).unsqueeze(0)
+degradations = ['motion-blurry','hazy','jpeg-compressed','low-light','noisy','raindrop','rainy','shadowed','snowy','uncompleted']
+text = tokenizer(degradations)
+
+with torch.no_grad(), torch.cuda.amp.autocast():
+    text_features = model.encode_text(text)
+    image_features, degra_features = model.encode_image(image, control=True)
+    degra_features /= degra_features(dim=-1, keepdim=True)
+    text_features /= text_features.norm(dim=-1, keepdim=True)
+
+    text_probs = (100.0 * degra_features @ text_features.T).softmax(dim=-1)
+    index = torch.argmax(text_probs[0])
+
+print(f"Task: {task_name}: {degradations[index]} - {text_probs[0][index]}")
+```
 
 ### Dataset Preparation
 
@@ -52,7 +83,7 @@ datasets/universal/daclip_train.csv
 datasets/universal/daclip_val.csv
 ```
 
-Then get into the `codes/config/daclip-sde` directory and modify the dataset paths in option files in `options/train.yml` and `options/tes.yml`. 
+Then get into the `universal-image-restoration/config/daclip-sde` directory and modify the dataset paths in option files in `options/train.yml` and `options/tes.yml`. 
 
 You can add more tasks or datasets to both `train` and `val` directories and add the degradation word to `distortion`.
 
@@ -63,14 +94,14 @@ You can add more tasks or datasets to both `train` and `val` directories and add
 (Coming soon...)
 
 #### Universal Image Restoration
-The main code for training is in `codes/config/daclip-sde` and the core network for DA-CLIP is in `codes/open_clip/daclip_model.py`.
+The main code for training is in `universal-image-restoration/config/daclip-sde` and the core network for DA-CLIP is in `universal-image-restoration/open_clip/daclip_model.py`.
 
 * Put the pretrained [**DA-CLIP weights**](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) to `pretrained` directory and check the `daclip` path.
 
 * You can then train the model following below bash scripts:
 
 ```bash
-cd codes/config/daclip-sde
+cd universal-image-restoration/config/daclip-sde
 
 # For single GPU:
 python3 train.py -opt=options/train.yml
@@ -86,18 +117,13 @@ You can print your log at time by running `tail -f log/universal-ir/train_univer
 To evalute our method on image restoration, please modify the benchmark path and model path and run
 
 ```bash
-cd codes/config/universal-ir
+cd universal-image-restoration/config/universal-ir
 python test.py -opt=options/test.yml
 ```
 
 ### Results
 
-<details>
-<summary><strong>Degradation-Specific Restoration</strong> (click to expand) </summary>
-
-![daclip](figs/results_single.jpg)
-
-</details>
+![daclip](figs/UIR_results_radar.jpg)
 
 <details>
 <summary><strong>Unified Image Restoration</strong> (click to expand) </summary>
@@ -107,11 +133,13 @@ python test.py -opt=options/test.yml
 </details>
 
 <details>
-<summary><strong>Radar Results</strong> (click to expand) </summary>
+<summary><strong>Degradation-Specific Restoration</strong> (click to expand) </summary>
 
-![daclip](figs/UIR_results_radar.jpg)
+![daclip](figs/results_single.jpg)
 
 </details>
+
+
 
 ---
 

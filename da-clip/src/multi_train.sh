@@ -1,0 +1,18 @@
+torchrun --nproc_per_node 4 -m training.main \
+    --save-frequency 1 \
+    --zeroshot-frequency 1 \
+    --report-to tensorboard \
+    --train-data="/home/x_ziwlu/datasets/universal/daclip_train.csv"  \
+    --val-data="/home/x_ziwlu/datasets/universal/daclip_val.csv"  \
+    --csv-img-key filepath \
+    --csv-caption-key title \
+    --warmup 100 \
+    --batch-size=784 \
+    --lr=3e-5 \
+    --wd=0.05 \
+    --epochs=100 \
+    --workers=8 \
+    --model daclip_ViT-B-32 \
+    --name "daclip_ViT-B-32-2023-09_b768x4_lr3e-5_e100_zeroadd" \
+    --pretrained "laion2b_s34b_b79k" \
+    --da

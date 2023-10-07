@@ -91,7 +91,7 @@ You can add more tasks or datasets to both `train` and `val` directories and add
 ### Training
 
 #### DA-CLIP 
-(Coming soon...)
+See [DA-CLIP.md](da-clip/DA-CLIP.md) for details.
 
 #### Universal Image Restoration
 The main code for training is in `universal-image-restoration/config/daclip-sde` and the core network for DA-CLIP is in `universal-image-restoration/open_clip/daclip_model.py`.
@@ -148,6 +148,21 @@ python test.py -opt=options/test.yml
 #### Contact
 If you have any question, please contact: ziwei.luo@it.uu.se
 
+
+### Citations
+If our code helps your research or work, please consider citing our paper.
+The following are BibTeX references:
+
+```
+@article{luo2023controlling,
+  title={Controlling Vision-Language Models for Universal Image Restoration},
+  author={Luo, Ziwei and Gustafsson, Fredrik K and Zhao, Zheng and Sj{\"o}lund, Jens and Sch{\"o}n, Thomas B},
+  journal={arXiv preprint arXiv:2310.01018},
+  year={2023}
+}
+```
+
+---
 
 
 #### --- Thanks for your interest! --- ####

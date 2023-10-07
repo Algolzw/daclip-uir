@@ -91,7 +91,7 @@ You can add more tasks or datasets to both `train` and `val` directories and add
 ### Training
 
 #### DA-CLIP 
-See [DA-CLIP.md](da-clip/DA-CLIP.md) for details.
+See [DA-CLIP.md](da-clip/README.md) for details.
 
 #### Universal Image Restoration
 The main code for training is in `universal-image-restoration/config/daclip-sde` and the core network for DA-CLIP is in `universal-image-restoration/open_clip/daclip_model.py`.

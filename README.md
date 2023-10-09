@@ -9,6 +9,9 @@
 
 ![daclip](figs/overview.jpg)
 
+### Updates
+[**2023.10.09**] The **pretrained weights** of DA-CLIP and the Universal IR model are released in [link1](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [link2](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing), respectively. In addition, we also provide a [Gradio](https://gradio.app/) app file for the case that you want to [test your own images](https://github.com/Algolzw/daclip-uir#Gradio).<br>
+
 ## How to Run the Code?
 
 ### Install
@@ -121,6 +124,10 @@ cd universal-image-restoration/config/universal-ir
 python test.py -opt=options/test.yml
 ```
 
+### Gradio
+Here we provide an [app.py](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) file for testing your own images. Before that, you need to download the pretrained weights ([DA-CLIP](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [UIR](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing)) and modify the model path in `options/test.yml`. Then by simply running `python app.py`, you can open `http://localhost:7860` to test the model. (We also provide several images with different degradations in the `images` dir).
+
+
 ### Results
 
 ![daclip](figs/UIR_results_radar.jpg)
@@ -170,7 +177,7 @@ The following are BibTeX references:
 <details>
 <summary>statistics</summary>
 
-![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)
+<!--![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)-->
 
 </details>
 

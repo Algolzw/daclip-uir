@@ -177,7 +177,7 @@ The following are BibTeX references:
 <details>
 <summary>statistics</summary>
 
-<!--![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)-->
+![visitors](https://visitor-badge.laobi.icu/badge?page_id=Algolzw/daclip-uir)
 
 </details>
 

@@ -41,7 +41,7 @@ def clip_transform(np_image, resolution=224):
 
 
 def restore(image):
-    image = image[:, :, [2, 1, 0]] / 255.
+    image = image / 255.
     img4clip = clip_transform(image).unsqueeze(0).to(device)
     with torch.no_grad(), torch.cuda.amp.autocast():
         image_context, degra_context = clip_model.encode_image(img4clip, control=True)
@@ -54,7 +54,7 @@ def restore(image):
     model.test(sde)
     visuals = model.get_current_visuals(need_GT=False)
     output = util.tensor2img(visuals["Output"].squeeze())
-    return output
+    return output[:, :, [2, 1, 0]]
 
 interface = gr.Interface(fn=restore, inputs="image", outputs="image", title="Image Restoration with DA-CLIP")
 interface.launch()

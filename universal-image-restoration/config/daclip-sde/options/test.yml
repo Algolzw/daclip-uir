@@ -32,7 +32,7 @@ network_G:
     in_nc: 3
     out_nc: 3
     nf: 64
-    ch_mult: [1, 2, 4, 4]
+    ch_mult: [1, 2, 4, 8]
     context_dim: 512
     use_degra_context: true
     use_image_context: true

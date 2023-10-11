@@ -11,7 +11,7 @@
 
 ### Updates
 
-[**2023.10.11**] We updated the [Gradio file](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) with example LQ images and provide more examples from our test dataset [here](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing). We also thank @fffiloni for sharing the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP)!!!<br>
+[**2023.10.11**] We updated the [Gradio file](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) with example LQ images and provide more examples from our test dataset [here](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing). We also thank [@fffiloni](https://github.com/fffiloni) for sharing the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP) 🔥!!!<br>
 [**2023.10.09**] The **pretrained weights** of DA-CLIP and the Universal IR model are released in [link1](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [link2](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing), respectively. In addition, we also provide a [Gradio](https://gradio.app/) app file for the case that you want to [test your own images](https://github.com/Algolzw/daclip-uir#Gradio).<br>
 
 #### Notice!!

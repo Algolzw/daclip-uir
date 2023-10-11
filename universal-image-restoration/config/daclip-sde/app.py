@@ -1,11 +1,12 @@
 import gradio as gr
 import cv2
 import argparse
-import sys
+import sys, os
 import numpy as np
 import torch
 from PIL import Image
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize, InterpolationMode
+import torchvision.utils as tvutils
 
 import options as option
 from models import create_model
@@ -56,5 +57,6 @@ def restore(image):
     output = util.tensor2img(visuals["Output"].squeeze())
     return output[:, :, [2, 1, 0]]
 
-interface = gr.Interface(fn=restore, inputs="image", outputs="image", title="Image Restoration with DA-CLIP")
+examples=[os.path.join(os.path.dirname(__file__), f"images/{i}.jpg") for i in range(1, 11)]
+interface = gr.Interface(fn=restore, inputs="image", outputs="image", title="Image Restoration with DA-CLIP", examples=examples)
 interface.launch()

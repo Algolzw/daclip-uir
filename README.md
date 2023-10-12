@@ -19,9 +19,9 @@
 #### Notice!!
 🙁 In testing we found that the current pretrained model is still difficult to process some real-world images  which might have distribution shifts with our training dataset (captured from different devices or with different resolutions or degradations). We regard it as a future work and will try to make our model more practical! We also encourage users who are interested in our work to train their own models with larger dataset and more degradation types.
 
-BTW, **we also found that directly resizing input images will lead a poor performance for most tasks** 🙁. We could try to add the resize step into the training but it always destroys the image quality due to interpolation.
+🙁 BTW, **we also found that directly resizing input images will lead a poor performance for most tasks**. We could try to add the resize step into the training but it always destroys the image quality due to interpolation.
 
-For the inpainting task our current model only supports face inpainting due to the [dataset limitation](https://github.com/Algolzw/daclip-uir/issues/8#issuecomment-1759528246) 🙁. We provide our mask examples [here](https://github.com/Algolzw/daclip-uir/blob/00b4b6e9960f6ca712d7ef7362ba0348b5613eb4/universal-image-restoration/scripts/inpainting_masks) and you can use the [generate\_masked\_face](https://github.com/Algolzw/daclip-uir/blob/00b4b6e9960f6ca712d7ef7362ba0348b5613eb4/universal-image-restoration/scripts/generate_masked_face.py) script to generate uncompleted faces.
+🙁 For the inpainting task our current model only supports face inpainting due to the [dataset limitation](https://github.com/Algolzw/daclip-uir/issues/8#issuecomment-1759528246). We provide our mask [examples](https://github.com/Algolzw/daclip-uir/tree/main/scripts/inpainting_masks) and you can use the [generate\_masked\_face](https://github.com/Algolzw/daclip-uir/blob/main/scripts/generate_masked_face.py) script to generate uncompleted faces.
 
 
 ## How to Run the Code?

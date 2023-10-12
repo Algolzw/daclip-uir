@@ -13,16 +13,15 @@
 
 ### Updates
 
-[**2023.10.11**] We updated an online demo in [Colab](https://colab.research.google.com/github/camenduru/daclip-uir-colab/blob/main/daclip_uir_gradio_colab.ipynb). Thanks to [@camenduru](https://github.com/camenduru)!<br>
-[**2023.10.11**] We updated the [Gradio file](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) with example LQ images and provide more examples from our test dataset [here](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing). We also thank [@fffiloni](https://github.com/fffiloni) for sharing the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP) 🔥!!!<br>
+[**2023.10.12**] We updated the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP)🔥 and online Colab [demo](https://colab.research.google.com/github/camenduru/daclip-uir-colab/blob/main/daclip_uir_gradio_colab.ipynb)🔥. Thanks to [@fffiloni](https://github.com/fffiloni) and [@camenduru](https://github.com/camenduru) !!! We also provide more examples from our test dataset [here](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing).<br>
 [**2023.10.09**] The **pretrained weights** of DA-CLIP and the Universal IR model are released in [link1](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [link2](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing), respectively. In addition, we also provide a [Gradio](https://gradio.app/) app file for the case that you want to [test your own images](https://github.com/Algolzw/daclip-uir#Gradio).<br>
 
 #### Notice!!
-In testing we found that the current pretrained model is still difficult to process some real-world images 🙁 which might have distribution shifts with our training dataset (captured from different devices or with different resolutions or degradations). We regard it as a future work and will try to make our model more practical! We also encourage users who are interested in our work to train their own models with larger dataset and more degradation types.
+🙁 In testing we found that the current pretrained model is still difficult to process some real-world images  which might have distribution shifts with our training dataset (captured from different devices or with different resolutions or degradations). We regard it as a future work and will try to make our model more practical! We also encourage users who are interested in our work to train their own models with larger dataset and more degradation types.
 
-BTW, **we also found that directly resizing input images will lead a poor performance for most tasks**. We could try to add the resize step into the training but it always destroys the image quality due to interpolation.
+BTW, **we also found that directly resizing input images will lead a poor performance for most tasks** 🙁. We could try to add the resize step into the training but it always destroys the image quality due to interpolation.
 
-For the inpainting task our current only support face inpainting due to the [dataset limitation](https://github.com/Algolzw/daclip-uir/issues/8#issuecomment-1759528246). We provide our mask examples [here](https://drive.google.com/file/d/1U91P0w993k4emczMSImakzY1RTooyZez/view?usp=sharing) and you can use the [add\_random\_mask](https://github.com/Algolzw/daclip-uir/blob/00b4b6e9960f6ca712d7ef7362ba0348b5613eb4/universal-image-restoration/data/deg_util.py#L783) function to create uncompleted faces.
+For the inpainting task our current model only supports face inpainting due to the [dataset limitation](https://github.com/Algolzw/daclip-uir/issues/8#issuecomment-1759528246) 🙁. We provide our mask examples [here](https://github.com/Algolzw/daclip-uir/blob/00b4b6e9960f6ca712d7ef7362ba0348b5613eb4/universal-image-restoration/scripts/inpainting_masks) and you can use the [generate\_masked\_face](https://github.com/Algolzw/daclip-uir/blob/00b4b6e9960f6ca712d7ef7362ba0348b5613eb4/universal-image-restoration/scripts/generate_masked_face.py) script to generate uncompleted faces.
 
 
 ## How to Run the Code?
@@ -146,7 +145,7 @@ python test.py -opt=options/test.yml
 ```
 
 ### Gradio
-Here we provide an [app.py](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) file for testing your own images. Before that, you need to download the pretrained weights ([DA-CLIP](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [UIR](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing)) and modify the model path in `options/test.yml`. Then by simply running `python app.py`, you can open `http://localhost:7860` to test the model. (We also provide several images with different degradations in the `images` dir).
+Here we provide an [app.py](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) file for testing your own images. Before that, you need to download the pretrained weights ([DA-CLIP](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [UIR](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing)) and modify the model path in `options/test.yml`. Then by simply running `python app.py`, you can open `http://localhost:7860` to test the model. (We also provide several images with different degradations in the `images` dir). We also provide more examples from our test dataset in the [google drive](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing).
 
 
 ### Results

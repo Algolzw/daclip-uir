@@ -27,7 +27,7 @@
 ## How to Run the Code?
 
 
-### Dependenices
+### Dependencies
 
 * OS: Ubuntu 20.04
 * nvidia:

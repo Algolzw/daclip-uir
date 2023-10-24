@@ -61,7 +61,7 @@ class Predictor(BasePredictor):
     ) -> Path:
         """Run a single prediction on the model"""
         image = cv2.imread(str(image))
-        image = image / 255.0
+        image = image[:, :, [2, 1, 0]] / 255.0
         img4clip = clip_transform(image).unsqueeze(0).to(self.device)
         with torch.no_grad(), torch.cuda.amp.autocast():
             image_context, degra_context = self.clip_model.encode_image(
@@ -86,7 +86,7 @@ class Predictor(BasePredictor):
 
         out_path = "/tmp/out.png"
 
-        cv2.imwrite(out_path, output[:, :, [2, 1, 0]])
+        cv2.imwrite(out_path, output)
 
         return Path(out_path)
 

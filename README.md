@@ -12,8 +12,8 @@
 ![daclip](figs/overview.jpg)
 
 ### Updates
-[**2023.10.13**] Added the Replicate [demo](https://replicate.com/cjwbw/daclip-uir) and [api](https://replicate.com/cjwbw/daclip-uir/api) 🔥. Thanks to [@chenxwh](https://github.com/chenxwh)!!!<br>
-[**2023.10.12**] We updated the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP)🔥 and online Colab [demo](https://colab.research.google.com/github/camenduru/daclip-uir-colab/blob/main/daclip_uir_gradio_colab.ipynb)🔥. Thanks to [@fffiloni](https://github.com/fffiloni) and [@camenduru](https://github.com/camenduru) !!! We also made a [Model Card](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde) in Hugging Face 🤗 and provided more [examples](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing) from our test dataset.<br>
+[**2023.10.25**] Added [dataset links](https://github.com/Algolzw/daclip-uir#dataset-links) for training and testing. <br>
+[**2023.10.13**] Added the Replicate [demo](https://replicate.com/cjwbw/daclip-uir) and [api](https://replicate.com/cjwbw/daclip-uir/api)🔥. Thanks to [@chenxwh](https://github.com/chenxwh)!!! We updated the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP)🔥 and online Colab [demo](https://colab.research.google.com/github/camenduru/daclip-uir-colab/blob/main/daclip_uir_gradio_colab.ipynb)🔥. Thanks to [@fffiloni](https://github.com/fffiloni) and [@camenduru](https://github.com/camenduru) !!! We also made a [Model Card](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde) in Hugging Face 🤗 and provided more [examples](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing) for testing.<br>
 [**2023.10.09**] The **pretrained weights** of DA-CLIP and the Universal IR model are released in [link1](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [link2](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing), respectively. In addition, we also provide a [Gradio](https://gradio.app/) app file for the case that you want to [test your own images](https://github.com/Algolzw/daclip-uir#Gradio).<br>
 
 #### Notice!!
@@ -27,7 +27,7 @@
 ## How to Run the Code?
 
 
-### Dependenices
+### Dependencies
 
 * OS: Ubuntu 20.04
 * nvidia:
@@ -110,6 +110,17 @@ Then get into the `universal-image-restoration/config/daclip-sde` directory and 
 
 You can add more tasks or datasets to both `train` and `val` directories and add the degradation word to `distortion`.
 
+#### Dataset Links
+
+| Degradation |                                  motion-blurry                                  |                                                 hazy                                                 |                                                  jpeg-compressed*                                                  |                                   low-light                                   |                                                noisy* (same to jpeg)                                               |
+|-------------|:-------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|
+| Datasets    | [Gopro](https://drive.google.com/file/d/1y4wvPdOG3mojpFCHTqLgriexhbjoWVkK/view) | [RESIDE-6k](https://drive.google.com/drive/folders/1XVD0x74vKQ0-cqazACUZnjUOWURXIeqH?usp=drive_link) | [DIV2K](https://cv.snu.ac.kr/research/EDSR/DIV2K.tar)+[Flickr2K](https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar) | [LOL](https://drive.google.com/file/d/157bjO1_cFuSd0HWDUuAmcHRJDVyWpOxB/view) | [DIV2K](https://cv.snu.ac.kr/research/EDSR/DIV2K.tar)+[Flickr2K](https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar) | 
+
+| Degradation |                                    raindrop                                    |                              rainy                             |                                    shadowed                                   |                                                                                         snowy                                                                                         |                                      uncompleted                                      |
+|-------------|:-------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------:|
+| Datasets    | [RainDrop](https://drive.google.com/open?id=1e7R76s6vwUJxILOcAsthgDLPSnOrQ49K) | [Rain100H](http://www.icst.pku.edu.cn/struct/att/Rain100H.zip) | [SRD](https://drive.google.com/file/d/1W8vBRJYDG9imMgr9I2XaA13tlFIEHOjS/view) | [Snow100K](https://www.google.com/url?q=https%3A%2F%2Fdesnownet.s3.amazonaws.com%2Fdataset_synthetic%2Ftrain%2FSnow100K-training.tar.gz&sa=D&sntz=1&usg=AOvVaw1Zj_7kQaF0c26DaZcoKEOr) | [CelebaHQ-256](https://www.kaggle.com/datasets/badasstechie/celebahq-resized-256x256) |
+
+You should **only extract the train datasets for training**, and all **validation datasets** can be downloaded in the [Google drive](https://drive.google.com/file/d/1JKd1tA7rMoEbI9190daJqL7i6V1L8KUd/view?usp=sharing). For jpeg and noisy datasets, you can generate LQ images using this [script](https://github.com/Algolzw/daclip-uir/blob/main/scripts/generate_LQ.py).
 
 ### Training
 
@@ -135,6 +146,12 @@ python3 -m torch.distributed.launch --nproc_per_node=2 --master_poer=4321 train.
 
 The models and training logs will save in `log/universal-ir`. 
 You can print your log at time by running `tail -f log/universal-ir/train_universal-ir_***.log -n 100`.
+
+#### Pretrained Models
+| Model Name   | Description                                     | GoogleDrive                                                                                   | HuggingFace                                                                                      |
+|--------------|-------------------------------------------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| DA-CLIP      | Degradation-aware CLIP model                    | [download](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/daclip_ViT-B-32.pt) |
+| Universal-IR | DA-CLIP based universal image restoration model | [download](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/universal-ir.pth)   |
 
 ### Evaluation
 To evalute our method on image restoration, please modify the benchmark path and model path and run

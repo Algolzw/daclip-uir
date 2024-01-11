@@ -294,7 +294,7 @@ class ControlTransformer(nn.Module):
 
         self.zero_modules =  nn.ModuleList([
             self.zero_module(nn.Linear(self.width, self.width, 1))
-            for _ in range(self.layers)]).cuda()
+            for _ in range(self.layers)])
         self.grad_checkpointing = transformer.grad_checkpointing
 
     def zero_module(self, module):

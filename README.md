@@ -7,10 +7,6 @@
 
 ![daclip](figs/teaser.jpg)
 
-### Overview framework:
-
-![daclip](figs/overview.jpg)
-
 ### Updates
 [**2024.01.20**]  🎉🎉🎉 Our DA-CLIP paper was accepted by ICLR 2024 🎉🎉🎉 We further provide a more robust model in the [model card](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/tree/main). <br>
 [**2023.10.25**] Added [dataset links](https://github.com/Algolzw/daclip-uir#dataset-links) for training and testing. <br>

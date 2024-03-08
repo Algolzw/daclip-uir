@@ -196,8 +196,8 @@ def main():
     assert train_loader is not None
     assert val_loader is not None
 
-    #### create model
-    model = create_model(opt) 
+    #### create 
+    model = create_model(opt) #denoising model
     device = model.device
 
     # clip_model, _preprocess = clip.load("ViT-B/32", device=device)
@@ -222,7 +222,7 @@ def main():
     else:
         current_step = 0
         start_epoch = 0
-
+    
     sde = util.IRSDE(max_sigma=opt["sde"]["max_sigma"], T=opt["sde"]["T"], schedule=opt["sde"]["schedule"], eps=opt["sde"]["eps"], device=device)
     sde.set_model(model.model)
 
@@ -247,9 +247,8 @@ def main():
 
             if current_step > total_iters:
                 break
-
-            LQ, GT, deg_type = train_data["LQ"], train_data["GT"], train_data["type"]
-            deg_token = tokenizer(deg_type).to(device)
+            LQ, GT, visual_feature, deg_type = train_data["LQ"], train_data["GT"], train_data['visual_feature'], train_data["type"]
+            # deg_token = tokenizer(deg_type).to(device)
             img4clip = train_data["LQ_clip"].to(device)
             with torch.no_grad(), torch.cuda.amp.autocast():
                 image_context, degra_context = clip_model.encode_image(img4clip, control=True)
@@ -258,7 +257,8 @@ def main():
 
             timesteps, states = sde.generate_random_states(x0=GT, mu=LQ)
 
-            model.feed_data(states, LQ, GT, text_context=degra_context, image_context=image_context) # xt, mu, x0
+            #IR-SDE Part
+            model.feed_data(states, LQ, visual_feature, GT, text_context=degra_context, image_context=image_context) # xt, mu, x0
             model.optimize_parameters(current_step, timesteps, sde)
             model.update_learning_rate(
                 current_step, warmup_iter=opt["train"]["warmup_iter"]
@@ -285,8 +285,8 @@ def main():
                 idx = 0
                 for _, val_data in enumerate(val_loader):
 
-                    LQ, GT, deg_type = val_data["LQ"], val_data["GT"], val_data["type"]
-                    deg_token = tokenizer(deg_type).to(device)
+                    LQ, GT, visual_feature, deg_type = val_data["LQ"], val_data["GT"], val_data['visual_feature'], val_data["type"]
+                    # deg_token = tokenizer(deg_type).to(device)
                     img4clip = val_data["LQ_clip"].to(device)
                     with torch.no_grad(), torch.cuda.amp.autocast():
                         image_context, degra_context = clip_model.encode_image(img4clip, control=True)
@@ -296,7 +296,7 @@ def main():
                     noisy_state = sde.noise_state(LQ)
 
                     # valid Predictor
-                    model.feed_data(noisy_state, LQ, GT, text_context=degra_context, image_context=image_context)
+                    model.feed_data(noisy_state, LQ, visual_feature, GT, text_context=degra_context, image_context=image_context)
                     model.test(sde)
                     visuals = model.get_current_visuals()
 

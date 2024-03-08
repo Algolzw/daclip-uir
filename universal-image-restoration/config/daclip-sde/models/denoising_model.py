@@ -32,7 +32,8 @@ class DenoisingModel(BaseModel):
             self.rank = -1  # non dist training
         train_opt = opt["train"]
 
-        # define network and load pretrained models
+        # define network and load pretrained models 
+        # define conditional unet as self.model
         self.model = networks.define_G(opt).to(self.device)
         if opt["dist"]:
             self.model = DistributedDataParallel(
@@ -118,9 +119,10 @@ class DenoisingModel(BaseModel):
             self.ema = EMA(self.model, beta=0.995, update_every=10).to(self.device)
             self.log_dict = OrderedDict()
 
-    def feed_data(self, state, LQ, GT=None, text_context=None, image_context=None):
+    def feed_data(self, state, LQ, visual_feature, GT=None, text_context=None, image_context=None):
         self.state = state.to(self.device)    # noisy_state
         self.condition = LQ.to(self.device)  # LQ
+        self.visual_feature = visual_feature.to(self.device)  # visual_feature
         if GT is not None:
             self.state_0 = GT.to(self.device)  # GT
         self.text_context = text_context
@@ -134,7 +136,7 @@ class DenoisingModel(BaseModel):
         timesteps = timesteps.to(self.device)
 
         # Get noise and score
-        noise = sde.noise_fn(self.state, timesteps.squeeze(), text_context=self.text_context, image_context=self.image_context)
+        noise = sde.noise_fn(self.state, timesteps.squeeze(), visual_feature = self.visual_feature, text_context=self.text_context, image_context=self.image_context)
         score = sde.get_score_from_noise(noise, timesteps)
 
         # Learning the maximum likelihood objective for state x_{t-1}
@@ -154,7 +156,7 @@ class DenoisingModel(BaseModel):
 
         self.model.eval()
         with torch.no_grad():
-            self.output = sde.reverse_sde(self.state, save_states=save_states, text_context=self.text_context, image_context=self.image_context)
+            self.output = sde.reverse_sde(self.state, save_states=save_states, visual_feature = self.visual_feature, text_context=self.text_context, image_context=self.image_context)
 
         self.model.train()
 

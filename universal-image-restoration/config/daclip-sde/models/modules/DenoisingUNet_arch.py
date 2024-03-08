@@ -15,7 +15,7 @@ from .module_util import (
     LinearAttention, Attention,
     PreNorm, Residual)
 
-from .attention import SpatialTransformer
+from .attention import SpatialTransformer, Fusion_AttentionBlock
 
 
 class ConditionalUNet(nn.Module):
@@ -55,6 +55,9 @@ class ConditionalUNet(nn.Module):
             nn.Linear(time_dim, time_dim)
         )
 
+        self.fusion_attention_block = Fusion_AttentionBlock(low_level_dim=4096, degradation_dim=context_dim, embed_dim=context_dim)
+        
+        
         if self.context_dim > 0 and use_degra_context: 
             self.prompt = nn.Parameter(torch.rand(1, time_dim))
             self.text_mlp = nn.Sequential(
@@ -115,12 +118,13 @@ class ConditionalUNet(nn.Module):
         x = F.pad(x, (0, mod_pad_w, 0, mod_pad_h), 'reflect')
         return x
 
-    def forward(self, xt, cond, time, text_context=None, image_context=None):
-
+    def forward(self, xt, cond, time, visual_feature = None, text_context=None, image_context=None):
+        #visual_feature : [B, 51, 4096]
         if isinstance(time, int) or isinstance(time, float):
             time = torch.tensor([time]).to(xt.device)
-        
-        x = xt - cond
+        #cond : LQ image
+        #xt : noisy state (input + noise added)
+        x = xt - cond #initial guess of noise
         x = torch.cat([x, cond], dim=1)
 
         H, W = x.shape[2:]
@@ -130,9 +134,11 @@ class ConditionalUNet(nn.Module):
         x_ = x.clone()
 
         t = self.time_mlp(time) 
+        # attention of text context and visual_feature
+        deg_low_level_fused = self.fusion_attention_block(visual_feature, text_context)
         if self.context_dim > 0:
             if self.use_degra_context and text_context is not None:
-                prompt_embedding = torch.softmax(self.text_mlp(text_context), dim=1) * self.prompt
+                prompt_embedding = torch.softmax(self.text_mlp(deg_low_level_fused), dim=1) * self.prompt
                 prompt_embedding = self.prompt_mlp(prompt_embedding)
                 t = t + prompt_embedding
 

@@ -259,3 +259,31 @@ class SpatialTransformer(nn.Module):
         x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w)
         x = self.proj_out(x)
         return x + x_in
+
+class Fusion_AttentionBlock(nn.Module):
+    def __init__(self, low_level_dim, degradation_dim, embed_dim):
+        #degradation_dim : 4096, low_level_dim : 512, embed_dim : 512
+        super().__init__()
+        self.low_level_project = nn.Linear(low_level_dim, embed_dim)
+        # self.degradation_project = nn.Linear(degradation_dim, embed_dim)
+        self.fusion_project = nn.Linear(embed_dim*2, embed_dim)
+        self.embed_dim = embed_dim
+        self.init_weights()
+
+    def init_weights(self):
+        for module in [self.low_level_project, self.fusion_project]:
+            nn.init.constant_(module.bias, 0.)
+            nn.init.constant_(module.weight, 1.0)
+    
+    def forward(self, low_level_feat, degradation_feat):
+        #low_level_feat : [B, 51, 4096], degradation_feat : [B, 512]
+        # Project features
+        proj_low_level = self.low_level_project(low_level_feat) #shape : [B, 51, 512]
+        # proj_degradation = self.degradation_project(degradation_feat.unsqueeze(1)) #shape : [B, 1, 512]
+        proj_degradation = degradation_feat.unsqueeze(1)
+        attention_score = torch.einsum('bik,bjk->bij', proj_degradation, proj_low_level) #shape : [B, 51]
+        attention = torch.softmax(attention_score, dim=2)
+        attended_feat = torch.einsum('bij,bjk->bik', attention, proj_low_level) #shape : [B, 1, 512]
+        fused_feat = torch.cat((attended_feat, proj_degradation), dim=2) #shape : [B, 1, 1024]
+        fused_feat = self.fusion_project(fused_feat).squeeze()
+        return fused_feat

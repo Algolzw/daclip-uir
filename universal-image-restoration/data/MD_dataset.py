@@ -44,7 +44,8 @@ class MDDataset(data.Dataset):
             LR_paths = util.get_image_paths(
                 opt["data_type"], os.path.join(opt["dataroot"], deg_type, 'LQ')
             )  # LR list
-            self.distortion[deg_type] = (GT_paths, LR_paths)
+            visual_feature_paths = util.get_visual_feature_path(os.path.join(opt["dataroot"], deg_type, 'LQ'))
+            self.distortion[deg_type] = (GT_paths, LR_paths, visual_feature_paths)
         self.data_lens = [len(self.distortion[deg_type][0]) for deg_type in self.deg_types]
 
         self.random_scale_list = [1]
@@ -58,9 +59,9 @@ class MDDataset(data.Dataset):
         #     index -= len(self.distortion[deg_type][0])
         #     deg_type = self.deg_types[type_id]
 
-        type_id = int(index % len(self.deg_types))
+        type_id = int(index % len(self.deg_types)) # len(self.deg_types) = 10 --> type_id = 0, 1, 2, ..., 9
         if self.opt["phase"] == "train":
-            deg_type = self.deg_types[type_id]
+            deg_type = self.deg_types[type_id] 
             index = np.random.randint(self.data_lens[type_id])
         else:
             while index // len(self.deg_types) >= self.data_lens[type_id]:
@@ -81,6 +82,11 @@ class MDDataset(data.Dataset):
             None, LQ_path, None
         )  # return: Numpy float32, HWC, BGR, [0,1]
 
+        # get visual feature
+        visual_feature_path = self.distortion[deg_type][2][index]
+        # load npy file
+        visual_feature = np.load(visual_feature_path)
+        
         if self.opt["phase"] == "train":
             H, W, C = img_GT.shape
 
@@ -112,8 +118,9 @@ class MDDataset(data.Dataset):
 
         img_GT = torch.from_numpy(np.ascontiguousarray(np.transpose(img_GT, (2, 0, 1)))).float()
         img_LQ = torch.from_numpy(np.ascontiguousarray(np.transpose(img_LQ, (2, 0, 1)))).float()
+        visual_feature = torch.from_numpy(visual_feature).float().squeeze()
 
-        return {"GT": img_GT, "LQ": img_LQ, "LQ_clip": lq4clip,  "type": deg_type, "GT_path": GT_path}
+        return {"GT": img_GT, "LQ": img_LQ, "LQ_clip": lq4clip, "visual_feature" : visual_feature,  "type": deg_type, "GT_path": GT_path}
 
     def __len__(self):
         return np.sum(self.data_lens)

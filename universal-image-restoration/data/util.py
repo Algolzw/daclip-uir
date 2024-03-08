@@ -38,6 +38,17 @@ def _get_paths_from_lmdb(dataroot):
         sizes = sizes * len(paths)
     return paths, sizes
 
+def get_visual_feature_path(dataroot):
+    '''get visual feature path list(npy)'''
+    assert os.path.isdir(dataroot), '{:s} is not a valid directory'.format(dataroot)
+    features = []
+    for dirpath, _, fnames in sorted(os.walk(dataroot)):
+        for fname in sorted(fnames):
+            if fname.endswith('.npy'):
+                features_path = os.path.join(dirpath, fname)
+                features.append(features_path)
+    return features
+
 
 def get_image_paths(data_type, dataroot):
     '''get image path list

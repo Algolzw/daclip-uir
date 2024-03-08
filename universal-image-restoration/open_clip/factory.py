@@ -107,7 +107,7 @@ def load_checkpoint(model, checkpoint_path, strict=True):
 
 
 def create_model(
-        model_name: str,
+        model_name: str, #daclip_ViT-B-32
         pretrained: Optional[str] = None,
         precision: str = 'fp32',
         device: Union[str, torch.device] = 'cpu',
@@ -123,6 +123,7 @@ def create_model(
         require_pretrained: bool = False,
 ):
     has_hf_hub_prefix = model_name.startswith(HF_HUB_PREFIX)
+    #huggingface 모델이면
     if has_hf_hub_prefix:
         model_id = model_name[len(HF_HUB_PREFIX):]
         checkpoint_path = download_pretrained_from_hf(model_id, cache_dir=cache_dir)
@@ -132,6 +133,7 @@ def create_model(
             config = json.load(f)
         pretrained_cfg = config['preprocess_cfg']
         model_cfg = config['model_cfg']
+    #huggingface 모델이 아니면
     else:
         model_name = model_name.replace('/', '-')  # for callers using old naming with / in ViT names
         checkpoint_path = None
@@ -140,7 +142,7 @@ def create_model(
 
     if isinstance(device, str):
         device = torch.device(device)
-
+    #openai 모델이면
     if pretrained and pretrained.lower() == 'openai':
         logging.info(f'Loading pretrained {model_name} from OpenAI.')
         model = load_openai_model(
@@ -149,6 +151,7 @@ def create_model(
             device=device,
             cache_dir=cache_dir,
         )
+    #openai 모델이 아니면
     else:
         model_cfg = model_cfg or get_model_config(model_name)
         if model_cfg is not None:
@@ -187,7 +190,7 @@ def create_model(
                 model_cfg['text_cfg']['hf_model_pretrained'] = pretrained_hf
             if "coca" in model_name:
                 model = CoCa(**model_cfg, cast_dtype=cast_dtype)
-            elif "daclip" in model_name:
+            elif "daclip" in model_name: #model name에 da-clip 있으면
                 clip_model = CLIP(**model_cfg, cast_dtype=cast_dtype)
                 model = DaCLIP(clip_model)
             else:
@@ -234,7 +237,7 @@ def create_model(
             if checkpoint_path:
                 logging.info(f'Loading pretrained {model_name} weights ({pretrained}).')
                 if pretrained_cfg and "daclip" in model_name:
-                    load_checkpoint(model.clip, checkpoint_path)
+                    load_checkpoint(model.clip, checkpoint_path) 
                     model.initial_controller()
                     model.lock_clip()
                 else:

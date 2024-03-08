@@ -42,10 +42,13 @@ class DaCLIP(nn.Module):
         self.clip.visual.set_grad_checkpointing(enable)
         self.clip.transformer.grad_checkpointing = enable
         self.visual_control.set_grad_checkpointing(enable)
-
+        
+    #High-Level image feature / Degradation features from LQ-image
     def encode_image(self, image, control=False, normalize: bool = False):
-        if control:
+        if control:#Using ControlNet
+            #ControlNet : extract degradation feature and hiddens feature 
             degra_features, hiddens = self.visual_control(image, output_hiddens=True)
+            #get High-Level image feature using the hidden feature from the ControlNet
             image_features = self.clip.visual(image, control=hiddens)
             
             image_features = F.normalize(image_features, dim=-1) if normalize else image_features

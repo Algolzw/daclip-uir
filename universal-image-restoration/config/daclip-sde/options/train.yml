@@ -3,7 +3,7 @@ name: universal-ir
 use_tb_logger: true
 model: denoising
 distortion: [motion-blurry,hazy,jpeg-compressed,low-light,noisy,raindrop,rainy,shadowed,snowy,uncompleted]
-gpu_ids: [0]
+gpu_ids: [6]
 
 sde:
   max_sigma: 50
@@ -24,11 +24,11 @@ datasets:
   train:
     name: Train_Dataset
     mode: MD
-    dataroot: datasets/universal/train
+    dataroot: /root/dataset/ImageRestoration/DA-CLIP/universal/train
 
     use_shuffle: true
     n_workers: 16  # per GPU
-    batch_size: 16
+    batch_size: 8
     patch_size: 256
     use_flip: true
     use_rot: true
@@ -36,7 +36,7 @@ datasets:
   val:
     name: Val_Dataset
     mode: MD
-    dataroot: datasets/universal/val
+    dataroot: /root/dataset/ImageRestoration/DA-CLIP/universal/val
 
 
 #### network structures
@@ -56,7 +56,7 @@ path:
   pretrain_model_G: ~
   strict_load: true
   resume_state: ~
-  daclip: pretrained/daclip_ViT-B-32.pt
+  daclip: /root/workplace/Pretrained_Ws/DA-CLIP_pretrained_w/daclip_ViT-B-32.pt
 
 #### training settings: learning rate scheme, loss
 train:

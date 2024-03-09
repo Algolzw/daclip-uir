@@ -280,10 +280,10 @@ class Fusion_AttentionBlock(nn.Module):
         # Project features
         proj_low_level = self.low_level_project(low_level_feat) #shape : [B, 51, 512]
         # proj_degradation = self.degradation_project(degradation_feat.unsqueeze(1)) #shape : [B, 1, 512]
-        proj_degradation = degradation_feat.unsqueeze(1)
-        attention_score = torch.einsum('bik,bjk->bij', proj_degradation, proj_low_level) #shape : [B, 51]
+        proj_degradation = degradation_feat.unsqueeze(1) #shape : [B, 1, 512]
+        attention_score = torch.einsum('bik,bjk->bij', proj_degradation, proj_low_level) #shape : [B, 1, 51]
         attention = torch.softmax(attention_score, dim=2)
         attended_feat = torch.einsum('bij,bjk->bik', attention, proj_low_level) #shape : [B, 1, 512]
         fused_feat = torch.cat((attended_feat, proj_degradation), dim=2) #shape : [B, 1, 1024]
-        fused_feat = self.fusion_project(fused_feat).squeeze()
+        fused_feat = self.fusion_project(fused_feat) #shape : [B, 1, embed_dim]
         return fused_feat

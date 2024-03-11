@@ -1,0 +1,86 @@
+#### general settings
+name: universal-ir
+use_tb_logger: true
+model: denoising
+distortion: [motion-blurry,hazy,jpeg-compressed,low-light,noisy,raindrop,rainy,shadowed,snowy,uncompleted]
+# distortion : [motion-blurry]
+gpu_ids: [9]
+
+sde:
+  max_sigma: 50
+  T: 100
+  schedule: cosine # linear, cosine
+  eps: 0.005
+
+degradation: # for some synthetic dataset that only have GTs
+  # for denoising
+  sigma: 25
+  noise_type: G # Gaussian noise: G
+
+  # for super-resolution
+  scale: 4
+  
+#### datasets
+datasets:
+  train:
+    name: Train_Dataset
+    mode: MD
+    dataroot: /root/dataset/ImageRestoration/DA-CLIP/universal/train
+
+    use_shuffle: true
+    n_workers: 16  # per GPU
+    batch_size: 8
+    patch_size: 256
+    use_flip: true
+    use_rot: true
+    color: RGB
+  val:
+    name: Val_Dataset
+    mode: MD
+    dataroot: /root/dataset/ImageRestoration/DA-CLIP/universal/val
+
+
+#### network structures
+network_G:
+  which_model_G: ConditionalUNet
+  setting:
+    in_nc: 3
+    out_nc: 3
+    nf: 64
+    ch_mult: [1, 2, 4, 8]
+    context_dim: 512
+    use_degra_context: true
+    use_image_context: true
+
+#### path
+path:
+  pretrain_model_G: ~
+  strict_load: true
+  resume_state: ~
+  daclip: /root/workplace/Pretrained_Ws/DA-CLIP_pretrained_w/daclip_ViT-B-32.pt
+
+#### training settings: learning rate scheme, loss
+train:
+  optimizer: AdamW # Adam, AdamW, Lion
+  lr_G: !!float 2e-4
+  lr_scheme: TrueCosineAnnealingLR # MultiStepLR
+  beta1: 0.9
+  beta2: 0.99
+  niter: 700000
+  warmup_iter: -1  # no warm up
+  lr_steps: [200000, 400000, 600000]
+  lr_gamma: 0.5
+  eta_min: !!float 1e-6
+
+  # criterion
+  is_weighted: False
+  loss_type: l1
+  weight: 1.0
+
+  manual_seed: 0
+  val_freq: !!float 2e2
+
+#### logger
+logger:
+  print_freq: 200
+  save_checkpoint_freq: !!float 1e4

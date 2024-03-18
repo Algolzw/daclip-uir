@@ -122,7 +122,7 @@ def augment(img, hflip=True, rot=True, mode=None):
         return img
     if mode in ['LQ','GT']:
         return _augment(img)
-    elif mode in ['LQGT', 'MDGT', 'MD']:
+    elif mode in ['LQGT', 'MDGT', 'MD', 'MDLQ']:
         return [_augment(I) for I in img]
 
 

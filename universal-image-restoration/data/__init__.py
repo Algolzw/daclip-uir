@@ -50,6 +50,9 @@ def create_dataset(dataset_opt):
     elif mode == "MD":  # Corrector
         from data.MD_dataset import MDDataset as D
         dataset = D(dataset_opt)
+    elif mode =="MDLQ":  # Corrector
+        from data.MDLQ_dataset import MDLQDataset as D
+        dataset = D(dataset_opt)
     else:
         raise NotImplementedError("Dataset [{:s}] is not recognized.".format(mode))
 

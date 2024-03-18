@@ -5,7 +5,7 @@ from tqdm import tqdm
 from sklearn.manifold import TSNE
 from matplotlib import pyplot as plt
 
-base_path = '/root/workplace/daclip-uir/degra_feature_data'
+base_path = '/root/workplace/daclip-uir/dataset/fusion_degra_feature'
 distortion = ['motion-blurry','hazy','jpeg-compressed','low-light','noisy','raindrop','rainy','shadowed','snowy','uncompleted']
 
 #get all filename in the base_path
@@ -30,5 +30,5 @@ plt.figure(figsize=(10, 10))
 for i, label in zip(range(10), distortion):
     plt.scatter(cluster[actual == label, 0], cluster[actual == label, 1], label=label)
 plt.legend()
-plt.savefig('/root/workplace/daclip-uir/universal-image-restoration/degra_feature_tsne.png')
+plt.savefig('/root/workplace/daclip-uir/universal-image-restoration/fusion_degra_feature_tsne.png')
 

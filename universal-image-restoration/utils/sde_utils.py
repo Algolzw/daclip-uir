@@ -276,7 +276,13 @@ class IRSDE(SDE):
                     tvutils.save_image(torch.cat([x_L, x_R], dim=3).data, f'{save_dir}/state_{idx}.png', normalize=False)
 
         return x
-
+    
+    def extract_feature(self, xt, T=-1, save_states=False, save_dir='sde_state', **kwargs):
+        T = self.sample_T if T < 0 else T
+        x = xt.clone()
+        feature = self.extractor(x, 0, self.sample_scale, **kwargs)
+        return feature
+    
     # sample ode using Black-box ODE solver (not used)
     def ode_sampler(self, xt, rtol=1e-5, atol=1e-5, method='RK45', eps=1e-3,):
         shape = xt.shape

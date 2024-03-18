@@ -118,7 +118,13 @@ class DenoisingModel(BaseModel):
 
             self.ema = EMA(self.model, beta=0.995, update_every=10).to(self.device)
             self.log_dict = OrderedDict()
-
+    def get_feature(self, sde=None, save_states=False):
+        sde.set_mu(self.condition)
+        self.model.eval()
+        with torch.no_grad():
+            feature = sde.extract_feature(self.state, save_states=save_states, visual_feature = self.visual_feature, text_context=self.text_context, image_context=self.image_context)
+            return feature
+        
     def feed_data(self, state, LQ, visual_feature, GT=None, text_context=None, image_context=None):
         self.state = state.to(self.device)    # noisy_state
         self.condition = LQ.to(self.device)  # LQ

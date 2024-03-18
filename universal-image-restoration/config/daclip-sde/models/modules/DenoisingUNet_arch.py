@@ -117,7 +117,12 @@ class ConditionalUNet(nn.Module):
         mod_pad_w = (s - w % s) % s
         x = F.pad(x, (0, mod_pad_w, 0, mod_pad_h), 'reflect')
         return x
-
+    
+    def extract_deg_low_level_feature(self, xt, cond, time, visual_feature = None, text_context=None, image_context=None):
+        # attention of text context and visual_feature
+        deg_low_level_fused = self.fusion_attention_block(visual_feature, text_context) # [B, 512]
+        return deg_low_level_fused
+    
     def forward(self, xt, cond, time, visual_feature = None, text_context=None, image_context=None):
         #visual_feature : [B, 51, 4096]
         if isinstance(time, int) or isinstance(time, float):

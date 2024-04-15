@@ -1,0 +1,45 @@
+name: wild-ir
+suffix: ~  # add suffix to saved images
+model: denoising
+distortion: wild
+gpu_ids: [0]
+
+sde:
+  max_sigma: 50
+  T: 100
+  schedule: cosine # linear, cosine
+  eps: 0.005
+  sampling_mode: posterior # sde or posterior
+  
+degradation:
+  # for denoising
+  sigma: 25
+  noise_type: G # Gaussian noise: G
+
+  # for super-resolution
+  scale: 4
+
+datasets:
+  test1:
+   name: div2k
+   mode: LQ
+   dataroot_LQ: /datasets/div2k/val/LQ
+   color: RGB
+  
+#### network structures
+network_G:
+  which_model_G: ConditionalUNet
+  setting:
+    in_nc: 3
+    out_nc: 3
+    nf: 64
+    ch_mult: [1, 2, 4, 8]
+    context_dim: 768
+    use_degra_context: false
+    use_image_context: true
+    scale: 0.5
+
+#### path
+path:
+  pretrain_model_G: pretrained/wild-ir.pth
+  daclip: pretrained/wild-daclip_ViT-L-14.pt

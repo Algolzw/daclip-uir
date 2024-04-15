@@ -9,6 +9,7 @@ sde:
   T: 100
   schedule: cosine # linear, cosine
   eps: 0.005
+  sampling_mode: posterior # sde or posterior
   
 degradation:
   # for denoising

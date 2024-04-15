@@ -212,6 +212,24 @@ class IRSDE(SDE):
 
         return term1 * (xt - self.mu) + term2 * (x0 - self.mu) + self.mu
 
+    def reverse_optimum_std(self, t):
+        A = torch.exp(-2 * self.thetas[t] * self.dt)
+        B = torch.exp(-2 * self.thetas_cumsum[t] * self.dt)
+        C = torch.exp(-2 * self.thetas_cumsum[t-1] * self.dt)
+
+        posterior_var = (1 - A) * (1 - C) / (1 - B)
+        # return torch.sqrt(posterior_var)
+
+        min_value = (1e-20 * self.dt).to(self.device)
+        log_posterior_var = torch.log(torch.clamp(posterior_var, min=min_value))
+        return (0.5 * log_posterior_var).exp() * self.max_sigma
+
+    def reverse_posterior_step(self, xt, noise, t):
+        x0 = self.get_init_state_from_noise(xt, noise, t)
+        mean = self.reverse_optimum_step(xt, x0, t)
+        std = self.reverse_optimum_std(t)
+        return mean + std * torch.randn_like(xt)
+
     def sigma(self, t):
         return self.sigmas[t]
 
@@ -247,7 +265,6 @@ class IRSDE(SDE):
         for t in tqdm(reversed(range(1, T + 1))):
             score = self.score_fn(x, t, self.sample_scale, **kwargs)
             x = self.reverse_sde_step(x, score, t)
-            # x = self.reverse_sde_step_mean(x, score, t)
 
             if save_states: # only consider to save 100 images
                 interval = self.T // 100
@@ -262,10 +279,28 @@ class IRSDE(SDE):
     def reverse_ode(self, xt, T=-1, save_states=False, save_dir='ode_state'):
         T = self.sample_T if T < 0 else T
         x = xt.clone()
-        for t in tqdm(reversed(range(1, T + 1))):
+        for t in reversed(range(1, T + 1)):
         # for t in tqdm(reversed(range(1, 81))):
             score = self.score_fn(x, t, self.sample_scale)
             x = self.reverse_ode_step(x, score, t)
+
+            if save_states: # only consider to save 100 images
+                interval = self.T // 100
+                if t % interval == 0:
+                    idx = t // interval
+                    os.makedirs(save_dir, exist_ok=True)
+                    x_L, x_R = x.chunk(2, dim=1)
+                    tvutils.save_image(torch.cat([x_L, x_R], dim=3).data, f'{save_dir}/state_{idx}.png', normalize=False)
+
+        return x
+
+    def reverse_posterior(self, xt, T=-1, save_states=False, save_dir='posterior_state', **kwargs):
+        T = self.sample_T if T < 0 else T
+
+        x = xt.clone()
+        for t in tqdm(reversed(range(1, T + 1))):
+            noise = self.noise_fn(x, t, self.sample_scale, **kwargs)
+            x = self.reverse_posterior_step(x, noise, t)
 
             if save_states: # only consider to save 100 images
                 interval = self.T // 100

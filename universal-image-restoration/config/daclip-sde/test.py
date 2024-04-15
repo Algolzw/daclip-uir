@@ -82,6 +82,7 @@ sde.set_model(model.model)
 lpips_fn = lpips.LPIPS(net='alex').to(device)
 
 scale = opt['degradation']['scale']
+sampling_mode = opt["sde"]["sampling_mode"]
 
 for test_loader in test_loaders:
     test_set_name = test_loader.dataset.opt["name"]  # path opt['']
@@ -119,7 +120,7 @@ for test_loader in test_loaders:
 
         model.feed_data(noisy_state, LQ, GT, text_context=degra_context, image_context=image_context)
         tic = time.time()
-        model.test(sde, save_states=False)
+        model.test(sde, mode=sampling_mode, save_states=False)
         toc = time.time()
         test_times.append(toc - tic)
 
@@ -137,10 +138,10 @@ for test_loader in test_loaders:
         util.save_img(output, save_img_path)
 
         # remove it if you only want to save output images
-        LQ_img_path = os.path.join(dataset_dir, img_name + "_LQ.png")
-        GT_img_path = os.path.join(dataset_dir, img_name + "_HQ.png")
-        util.save_img(LQ_, LQ_img_path)
-        util.save_img(GT_, GT_img_path)
+        # LQ_img_path = os.path.join(dataset_dir, img_name + "_LQ.png")
+        # GT_img_path = os.path.join(dataset_dir, img_name + "_HQ.png")
+        # util.save_img(LQ_, LQ_img_path)
+        # util.save_img(GT_, GT_img_path)
 
         if need_GT:
             gt_img = GT_ / 255.0

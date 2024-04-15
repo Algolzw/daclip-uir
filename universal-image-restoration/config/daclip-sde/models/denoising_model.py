@@ -149,12 +149,15 @@ class DenoisingModel(BaseModel):
         # set log
         self.log_dict["loss"] = loss.item()
 
-    def test(self, sde=None, save_states=False):
+    def test(self, sde=None, mode='posterior', save_states=False):
         sde.set_mu(self.condition)
 
         self.model.eval()
         with torch.no_grad():
-            self.output = sde.reverse_sde(self.state, save_states=save_states, text_context=self.text_context, image_context=self.image_context)
+            if mode == 'sde':
+                self.output = sde.reverse_sde(self.state, save_states=save_states, text_context=self.text_context, image_context=self.image_context)
+            else:
+                self.output = sde.reverse_posterior(self.state, save_states=save_states, text_context=self.text_context, image_context=self.image_context)
 
         self.model.train()
 

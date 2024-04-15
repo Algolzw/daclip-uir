@@ -1,3 +1,4 @@
+import os
 import cv2
 import math
 import numpy as np
@@ -5,7 +6,7 @@ import random
 import torch
 from scipy import special
 from scipy.stats import multivariate_normal
-from torchvision.transforms.functional_tensor import rgb_to_grayscale
+from torchvision.transforms.functional import rgb_to_grayscale
 
 # -------------------------------------------------------------------- #
 # --------------------------- blur kernels --------------------------- #
@@ -322,6 +323,136 @@ def random_bivariate_plateau(kernel_size,
 
     return kernel
 
+########################################################################
+########################################################################
+########################################################################
+# codes are modified from pyblur: https://github.com/lospooky/pyblur
+from skimage.draw import line, disk
+
+# defocus kernel
+def defocus_kernel(kernel_size):
+    kernel = np.zeros((kernel_size, kernel_size), dtype=np.float32)
+    circleCenterCoord = kernel_size // 2
+    circleRadius = circleCenterCoord + 1
+    
+    rr, cc = disk((circleCenterCoord, circleCenterCoord), circleRadius)
+    kernel[rr, cc] = 1
+    
+    if(kernel_size == 3 or kernel_size == 5):
+        kernel = Adjust(kernel, kernel_size)
+        
+    normalizationFactor = np.count_nonzero(kernel)
+    kernel = kernel / normalizationFactor
+    return kernel
+
+def Adjust(kernel, kernel_size):
+    kernel[0, 0] = 0
+    kernel[0, kernel_size-1] = 0
+    kernel[kernel_size-1, 0] = 0
+    kernel[kernel_size-1, kernel_size-1] = 0 
+    return kernel
+
+# box kernel
+def box_kernel(kernel_size):
+    kernel = np.ones((kernel_size, kernel_size), dtype=np.float32)        
+    normalizationFactor = np.count_nonzero(kernel)
+    kernel = kernel / normalizationFactor
+    return kernel
+
+########## motion kernels ###########
+# line motion kernel
+def random_line_kernel(kernel_size):
+    if kernel_size > 15: # to avoid over-large kernel
+        kernel_size = kernel_size - 10 
+    line_type = "full" # random.choice(["full", "right", "left"])
+    line_angle = randomAngle(kernel_size)
+    return line_kernel(kernel_size, line_angle, line_type)
+
+def line_kernel(kernel_size, angle, linetype="full"):
+    kernelCenter = int(kernel_size // 2)
+    angle = SanitizeAngleValue(kernelCenter, angle)
+    kernel = np.zeros((kernel_size, kernel_size), dtype=np.float32)
+    lineDict = LineDictionary(kernel_size)
+    lineAnchors = lineDict.lines[kernel_size][angle]
+
+    if linetype == "right":
+        lineAnchors[0] = kernelCenter
+        lineAnchors[1] = kernelCenter
+    if linetype == "left":
+        lineAnchors[2] = kernelCenter
+        lineAnchors[3] = kernelCenter
+
+    rr, cc = line(lineAnchors[0], lineAnchors[1], lineAnchors[2], lineAnchors[3])
+    kernel[rr, cc] = 1
+    normalizationFactor = np.count_nonzero(kernel)
+    kernel = kernel / normalizationFactor
+    return kernel
+
+def SanitizeAngleValue(kernelCenter, angle):
+    numDistinctLines = kernelCenter * 4
+    angle = math.fmod(angle, 180.0)
+    validLineAngles = np.linspace(0, 180, numDistinctLines, endpoint=False)
+    angle = nearestValue(angle, validLineAngles)
+    return angle
+
+def nearestValue(theta, validAngles):
+    idx = (np.abs(validAngles - theta)).argmin()
+    return validAngles[idx]
+
+def randomAngle(kernel_size):
+    kernelCenter = int(kernel_size // 2)
+    numDistinctLines = kernelCenter * 4
+    validLineAngles = np.linspace(0, 180, numDistinctLines, endpoint=False)
+    angleIdx = np.random.randint(0, len(validLineAngles))
+    return int(validLineAngles[angleIdx])
+
+class LineDictionary:
+    def __init__(self, n):
+        self.lines = {}
+        self.lines[n] = self.createNxNLines(n)
+
+    def createNxNLines(self, n):
+        assert (n - 1) % 2 == 0, "n must be a odd number!!!"
+        lines = {}
+        Num = 2 * n - 2
+        angle_unit = 180.0 / Num
+        cnt = 0
+        a = int((n - 1) / 2)
+        b = int((n + 1) / 2)
+
+        for i in range(a, n):
+            j = 0
+            lines[cnt * angle_unit] = [i, j, n - 1 - i, n - 1 - j]
+            cnt += 1
+        for j in range(1, b):
+            i = n - 1
+            lines[cnt * angle_unit] = [i, j, n - 1 - i, n - 1 - j]
+            cnt += 1
+        for j in range(b, n):
+            i = n - 1
+            lines[cnt * angle_unit] = [n - 1 - i, n - 1 - j, i, j]
+            cnt += 1
+        for i in range(1, a):
+            j = 0
+            lines[cnt * angle_unit] = [i, j, n - 1 - i, n - 1 - j]
+            cnt += 1
+        return lines
+
+# psf kernel
+import pickle
+pickledPsfFilename = os.path.join(os.path.dirname( __file__), "psf.pkl")
+
+with open(pickledPsfFilename, 'rb') as pklfile:
+    psfDictionary = pickle.load(pklfile, encoding='latin1')
+
+def psf_kernel():
+    return random.choice(psfDictionary)
+
+########################################################################
+########################################################################
+########################################################################
+
+
 
 def random_mixed_kernels(kernel_list,
                          kernel_prob,
@@ -337,7 +468,7 @@ def random_mixed_kernels(kernel_list,
     Args:
         kernel_list (tuple): a list name of kernel types,
             support ['iso', 'aniso', 'skew', 'generalized', 'plateau_iso',
-            'plateau_aniso']
+            'plateau_aniso', 'defocus', 'box', 'line', 'psf']
         kernel_prob (tuple): corresponding kernel probability for each
             kernel type
         kernel_size (int):
@@ -386,6 +517,15 @@ def random_mixed_kernels(kernel_list,
         kernel = random_bivariate_plateau(
             kernel_size, sigma_x_range, sigma_y_range, rotation_range, betap_range, 
             noise_range=None, isotropic=False)
+    elif kernel_type == 'defocus':
+        kernel = defocus_kernel(kernel_size)
+    elif kernel_type == 'box':
+        kernel = box_kernel(kernel_size)
+    elif kernel_type == 'line':
+        kernel = random_line_kernel(kernel_size)
+    elif kernel_type == 'psf':
+        kernel = psf_kernel()
+
     return kernel
 
 
@@ -750,7 +890,7 @@ def add_jpg_compression(img, quality=90):
             float32.
     """
     img = np.clip(img, 0, 1)
-    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), quality]
+    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), int(quality)]
     _, encimg = cv2.imencode('.jpg', img * 255., encode_param)
     img = np.float32(cv2.imdecode(encimg, 1)) / 255.
     return img
@@ -777,8 +917,6 @@ def random_add_jpg_compression(img, quality_range=(90, 100)):
 # ------------------------- inpainting ------------------------ #
 # ------------------------------------------------------------- #
 
-import os
-
 
 def add_random_mask(img, size=None, mask_root='../../inpainting_masks', mask_id=-1, n=100):
     if mask_id < 0:
@@ -795,11 +933,7 @@ def add_random_mask(img, size=None, mask_root='../../inpainting_masks', mask_id=
 
     return mask * img + (1. - mask)
 
-
 #################################################################
-#################################################################
-#################################################################
-
 
 def degrade(img, deg_type, param=15):
     """
@@ -822,4 +956,287 @@ def degrade(img, deg_type, param=15):
         output = add_jpg_compression(img, param)
 
     return output
+
+
+#################################################################
+#################################################################
+#################################################################
+
+def usm_sharp(img, weight=0.5, radius=50, threshold=10):
+    """USM sharpening.
+
+    Input image: I; Blurry image: B.
+    1. sharp = I + weight * (I - B)
+    2. Mask = 1 if abs(I - B) > threshold, else: 0
+    3. Blur mask:
+    4. Out = Mask * sharp + (1 - Mask) * I
+
+    Args:
+        img (Numpy array): Input image, HWC, BGR; float32, [0, 1].
+        weight (float): Sharp weight. Default: 1.
+        radius (float): Kernel size of Gaussian blur. Default: 50.
+        threshold (int):
+    """
+    radius = img.shape[0] // 10 if img.shape[0] < 500 else radius
+    if radius % 2 == 0:
+        radius += 1
+    blur = cv2.GaussianBlur(img, (radius, radius), 0)
+    residual = img - blur
+    mask = np.abs(residual) * 255 > threshold
+    mask = mask.astype('float32')
+    soft_mask = cv2.GaussianBlur(mask, (radius, radius), 0)
+
+    sharp = img + weight * residual
+    sharp = np.clip(sharp, 0, 1)
+    return soft_mask * sharp + (1 - soft_mask) * img
+
+from scipy import fftpack
+
+#wiener filter implementaion
+def wiener_filter(img, kernel, K=0.006, pad_s=20):
+    copy_img = np.pad(np.copy(img), pad_s, mode='symmetric')
+
+    # pad kernel to avoid shift
+    kernel /= np.sum(kernel)
+    sz = (copy_img.shape[0] - kernel.shape[0], copy_img.shape[1] - kernel.shape[1])  # total amount of padding
+    kernel = np.pad(kernel, (((sz[0]+1)//2, sz[0]//2), ((sz[1]+1)//2, sz[1]//2)), 'constant')
+    kernel = fftpack.ifftshift(kernel)
+
+    # wiener deconvolution
+    kernel = fftpack.fft2(kernel)
+    kernel = np.conj(kernel) / (np.abs(kernel) ** 2 + K)
+    copy_img = np.real(fftpack.ifft2(fftpack.fft2(copy_img) * kernel))
+
+    return copy_img[pad_s:-pad_s, pad_s:-pad_s]
+
+def wiener_filter_multi_channel(img, kernel, K=0.006, pad_s=20):
+    c_filtered = [wiener_filter(c, kernel) for c in cv2.split(img)]
+    img_filtered = cv2.merge(c_filtered)
+    return img_filtered
+
+
+################################################################
+
+pickledUCDPsfFilename = os.path.join(os.path.dirname( __file__), "ucdpsf.pkl")
+with open(pickledUCDPsfFilename, 'rb') as pklfile:
+    ucdpsfDictionary = pickle.load(pklfile, encoding='latin1')
+
+
+def match_dim(data, dim):
+    """
+    Resize image dimensions using crop or padding instead of up/down-sampling.
+
+    Args:
+        data (np.array): single channel or 3 channel image array. 
+            If 3-channel array (i.e. RGB), dimension -1 should be channels.
+        dim (int, int): Desired dimensions for H, W. i.e dim = (H, W)
+
+    Returns:
+        np.array: Input image matched to new dimensions.
+    """
+    # Pad outer regions of detector
+    if data.shape[0] < dim[0] or data.shape[1] < dim[1]:
+        data = pad_edges(data, dim[:2])
+    # Crop out edge regions outside detector dimensions     
+    if data.shape[0] > dim[0] or data.shape[1] > dim[1]:
+        data = center_crop(data, dim[:2])
+    return data
+
+def pad_edges(data, dim):
+    """
+    Pads H, W dimensions on outer edges to match desired dimensions if input dimension is lesser.
+    If difference between input and output dimension shape is odd, 
+    an additional pixel is added on the bottom/right padding.
+
+    Args:
+        data (np.array): single channel or 3 channel (i.e. RGB) image array. 
+            If 3-channel array, dimension -1 should be channels
+        dim (int, int): Desired dimensions for H, W. i.e dim = (H, W)
+
+    Returns:
+        np.array: Input image matched to new dimensions.
+    """
+    pad_h, pad_w = [max(dim[0] - data.shape[0], 0), 
+                    max(dim[1] - data.shape[1], 0)]
+    pad_top = pad_bot = pad_h // 2
+    pad_left = pad_right = pad_w // 2
+    
+    if pad_h % 2 != 0:
+        pad_bot += 1
+    if pad_w % 2 != 0:
+        pad_right += 1
+    pad_tuple = ((pad_top, pad_bot), (pad_left, pad_right))
+    if len(data.shape) == 3:
+        pad_tuple = pad_tuple + ((0, 0),)
+    return np.pad(data, pad_width=pad_tuple)
+
+def center_crop(data, dim):
+    """
+    Crops center H, W dimensions to match desired dimensions if input dimension is greater.
+
+    Args:
+        data (np.array): single channel or 3-channel image array. 
+        dim (int, int): Desired dimensions for H, W. i.e dim = (H, W)
+
+    Returns:
+        np.array: Input image matched to new dimensions.
+    """
+    h_start, w_start = [max(data.shape[0] - dim[0], 0) // 2,
+                        max(data.shape[1] - dim[1], 0) // 2]
+    h_end, w_end = [h_start + min(dim[0], data.shape[0]),
+                    w_start + min(dim[1], data.shape[1])]
+    return data[h_start:h_end, w_start:w_end]
+
+def fft_filter(img, kernel):
+    h, w = img.shape
+    if kernel.shape[0] != img.shape[0] or kernel.shape[1] != img.shape[1]:
+        kernel = match_dim(kernel, img.shape[:2])
+
+    # FFT Convolution of image and PSF
+    kernel = fftpack.ifftshift(kernel)
+    kernel = fftpack.fft2(kernel)
+    filtered_img = np.real(fftpack.ifft2(fftpack.fft2(img) * kernel))
+
+    return filtered_img
+
+def under_display_filter(img):
+    kernel = random.choice(ucdpsfDictionary).transpose(2, 0, 1)
+    c_filtered = [fft_filter(c, k) for c, k in zip(cv2.split(img), kernel)]
+    img_filtered = cv2.merge(c_filtered)
+
+    # if random.random() < 0.5:
+    p = random.uniform(0.1, 0.5)
+    img_filtered = img_filtered.astype(img.dtype)
+    img_filtered = cv2.addWeighted(img_filtered, p, img, 1 - p, 0)
+
+    np.clip((img_filtered * 255.0).round(), 0, 255) / 255.
+    return img_filtered
+
+################################################################
+
+def doule_resize(img, s=1.1):
+    h, w, _ = img.shape
+    hs, ws = int(h*s), int(w*s)
+    # interpolation = random.choice([cv2.INTER_AREA, cv2.INTER_CUBIC, cv2.INTER_LINEAR])
+    interpolation = cv2.INTER_CUBIC
+    resized = cv2.resize(img, (ws, hs), interpolation=interpolation)
+    return cv2.resize(resized, (w, h), interpolation=interpolation)
+
+def random_resize(img, hs=None, ws=None):
+    if hs is None or ws is None:
+        h, w, c = img.shape
+        s = random.uniform(0.5, 1.4)
+        hs, ws = int(h/s), int(w/s)
+    interpolation = random.choice([cv2.INTER_AREA, cv2.INTER_CUBIC, cv2.INTER_LINEAR])
+    return cv2.resize(img, (ws, hs), interpolation=interpolation)
+
+def predefined_mixed_kernel(kernel_size=21, blur_range=[0.2, 2.2]):
+    return random_mixed_kernels(
+        ['iso', 'aniso', 'generalized_iso', 'generalized_aniso', 'plateau_iso', 'plateau_aniso',
+         'defocus', 'box', 'line', 'psf'], 
+        [0.35, 0.2, 0.1, 0.03, 0.1, 0.03, 0.1, 0.03, 0.03, 0.03], kernel_size=kernel_size,
+        sigma_x_range=blur_range, sigma_y_range=blur_range,
+        betag_range=(0.5, 2), betap_range=(1, 1.5), noise_range=[0.9, 1.1])
+
+def predefined_sinc_kernel(kernel_size=21):
+    if kernel_size < 13:
+        omega_c = np.random.uniform(np.pi / 3, np.pi)
+    else:
+        omega_c = np.random.uniform(np.pi / 5, np.pi)
+    return circular_lowpass_kernel(omega_c, kernel_size, pad_to=False)
+
+def random_blur(img, max_radius=10, sinc_prob=0.1, deblur_prob=0.1, blur_range=[0.2, 2.2], deg_list=None):
+    kernel_range = [2 * v + 1 for v in range(2, max_radius)] # from 5 to 21
+    kernel_size = random.choice(kernel_range)
+    sinc_flag = random.random() < sinc_prob
+    kernel = predefined_sinc_kernel(kernel_size) if sinc_flag \
+                 else predefined_mixed_kernel(kernel_size, blur_range)
+    img = cv2.filter2D(img, -1, kernel)
+    ori_img = img
+
+    if deg_list is not None: deg_list.append('blur')
+    if sinc_flag and deg_list is not None: deg_list.append('ringing artifact')
+
+    if not sinc_flag and random.random() < deblur_prob and kernel_size < 8:
+        img = wiener_filter_multi_channel(img, kernel)
+        if deg_list is not None: deg_list.append('ringing artifact')
+
+        img = img.astype(ori_img.dtype)
+        # image blur blending
+        if not sinc_flag and random.random() < 0.1:
+            p = random.uniform(0.1, 0.5)
+            img = cv2.addWeighted(ori_img, p, img, 1 - p, 0)
+
+    return img
+
+def random_noise(img, gauss_prob=0.6):
+    if random.random() < gauss_prob:
+        img = random_add_gaussian_noise(img, sigma_range=(1, 5), gray_prob=0.4)
+    if random.random() < 1 - gauss_prob:
+        img = random_add_poisson_noise(img, scale_range=(0.01, 0.5), gray_prob=0.4)
+
+    img = np.clip((img * 255.0).round(), 0, 255).astype(np.uint8)
+    
+    return img / 255.
+
+
+##########################################################
+##########################################################
+
+# ['blur', 'ringing artifact', 'noise', 'jpeg block']
+
+def random_degrade(img, blur_prob=0.8, resize_prob=0.8, noise_prob=0.4, jpeg_prob=0.4, deg_list=None):
+    if deg_list is None: deg_list = []
+    h, w, c = img.shape
+
+    degradations_first  = np.random.permutation(['blur', 'resize', 'noise', 'jpeg'])
+    degradations_second = np.random.permutation(['blur', 'noise'])
+    degradations_third  = np.random.permutation(['blur', 'resize', 'jpeg'])
+
+    resize_flag = False
+    if random.random() < resize_prob:
+        resize_flag = True
+
+    ### first order
+    for deg_type in degradations_first:
+        if deg_type == 'blur':
+            if random.random() < blur_prob:
+                img = random_blur(img, max_radius=10, sinc_prob=0.1, deblur_prob=0.1, blur_range=[0.2, 2.2], deg_list=deg_list)
+            elif random.random() < 0.2:
+                img = under_display_filter(img)
+
+        elif deg_type == 'resize' and resize_flag:
+            deg_list.append('blur')
+            img = random_resize(img)
+        elif deg_type == 'noise' and random.random() < noise_prob:
+            deg_list.append('noise')
+            img = random_noise(img.astype('float32'))
+        elif deg_type == 'jpeg' and random.random() < jpeg_prob:
+            deg_list.append('jpeg block')
+            img = random_add_jpg_compression(img, quality_range=(60, 95))
+        
+    ### second order
+    for deg_type in degradations_second:
+        if deg_type == 'blur':
+            if random.random() < blur_prob * 0.5:
+                img = random_blur(img, max_radius=5, sinc_prob=0.1, deblur_prob=0.1, blur_range=[0.2, 1.5], deg_list=deg_list)
+            elif random.random() < 0.2:
+                img = under_display_filter(img)
+
+        elif deg_type == 'noise' and random.random() < noise_prob * 0.5:
+            deg_list.append('noise')
+            img = random_noise(img.astype('float32'))
+
+    ### third order
+    for deg_type in degradations_third:
+        if deg_type == 'blur' and random.random() < blur_prob:
+            img = random_blur(img, max_radius=10, sinc_prob=0.8, deblur_prob=0.1, blur_range=[0.2, 1.], deg_list=deg_list)
+        elif deg_type == 'resize' and resize_flag:
+            deg_list.append('blur')
+            img = random_resize(img, hs=h, ws=w)
+        elif deg_type == 'jpeg' and random.random() < jpeg_prob:
+            deg_list.append('jpeg block')
+            img = random_add_jpg_compression(img, quality_range=(80, 100))
+
+    return np.clip((img * 255.0).round(), 0, 255) / 255.
 

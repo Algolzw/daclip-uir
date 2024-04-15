@@ -8,6 +8,7 @@
 ![daclip](figs/teaser.jpg)
 
 ### Updates
+[**2024.04.15**]  Updated a [wild-IR](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/wild-ir) model for real-world degradations and the [posterior sampling](https://github.com/Algolzw/daclip-uir/blob/74b7851827b485287971300e4b2a56ea0f8f1d75/universal-image-restoration/utils/sde_utils.py#L297) for better image generation. The pretrained weights [wild-ir.pth](https://drive.google.com/file/d/1DqHL61gZJI-3EGsXPJrhERrrst7ZR6gP/view?usp=sharing) and [wild-daclip_ViT-L-14.pt](https://drive.google.com/file/d/1eVxgvwzwLl5oWSVIgnA2gycV6ewLEVJd/view?usp=sharing) are also provided for wild-ir. <br>
 [**2024.01.20**]  🎉🎉🎉 Our DA-CLIP paper was accepted by ICLR 2024 🎉🎉🎉 We further provide a more robust model in the [model card](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/tree/main). <br>
 [**2023.10.25**] Added [dataset links](https://github.com/Algolzw/daclip-uir#dataset-links) for training and testing. <br>
 [**2023.10.13**] Added the Replicate [demo](https://replicate.com/cjwbw/daclip-uir) and [api](https://replicate.com/cjwbw/daclip-uir/api)🔥. Thanks to [@chenxwh](https://github.com/chenxwh)!!! We updated the Hugging Face [demo](https://huggingface.co/spaces/fffiloni/DA-CLIP)🔥 and online Colab [demo](https://colab.research.google.com/github/camenduru/daclip-uir-colab/blob/main/daclip_uir_gradio_colab.ipynb)🔥. Thanks to [@fffiloni](https://github.com/fffiloni) and [@camenduru](https://github.com/camenduru) !!! We also made a [Model Card](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde) in Hugging Face 🤗 and provided more [examples](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing) for testing.<br>
@@ -96,7 +97,7 @@ datasets/universal/daclip_train.csv
 datasets/universal/daclip_val.csv
 ```
 
-Then get into the `universal-image-restoration/config/daclip-sde` directory and modify the dataset paths in option files in `options/train.yml` and `options/tes.yml`. 
+Then get into the `universal-image-restoration/config/daclip-sde` directory and modify the dataset paths in option files in `options/train.yml` and `options/test.yml`. 
 
 You can add more tasks or datasets to both `train` and `val` directories and add the degradation word to `distortion`.
 
@@ -137,6 +138,8 @@ python3 -m torch.distributed.launch --nproc_per_node=2 --master_poer=4321 train.
 The models and training logs will save in `log/universal-ir`. 
 You can print your log at time by running `tail -f log/universal-ir/train_universal-ir_***.log -n 100`.
 
+**The same training steps can be used for image restoration in the wild ([wild-ir](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/wild-ir)).**
+
 #### Pretrained Models
 | Model Name   | Description                                     | GoogleDrive                                                                                   | HuggingFace                                                                                      |
 |--------------|-------------------------------------------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
@@ -144,6 +147,8 @@ You can print your log at time by running `tail -f log/universal-ir/train_univer
 | Universal-IR | DA-CLIP based universal image restoration model | [download](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/universal-ir.pth)   |
 | DA-CLIP-mix      | Degradation-aware CLIP model (add Gaussian blur + face inpainting and Gaussian blur + Rainy)                   | [download](https://drive.google.com/file/d/12KZK9Apx74pU23OGG9YSybd6gzN_PuGU/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/daclip_ViT-B-32_mix.pt) |
 | Universal-IR-mix | DA-CLIP based universal image restoration model (add robust training and mix-degradations) | [download](https://drive.google.com/file/d/1HRgsEUCw4_m6CC_XYpJGHNjuIMd1jAcm/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/universal-ir-mix.pth)   |
+| Wild-DA-CLIP      | Degradation-aware CLIP model in the wild (ViT-L-14)                | [download](https://drive.google.com/file/d/1eVxgvwzwLl5oWSVIgnA2gycV6ewLEVJd/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/wild-daclip_ViT-L-14.pt) |
+| Wild-IR | DA-CLIP based image restoration model in the wild | [download](https://drive.google.com/file/d/1DqHL61gZJI-3EGsXPJrhERrrst7ZR6gP/view?usp=sharing) | [download](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/blob/main/wild-ir.pth)   |
 
 ### Evaluation
 To evalute our method on image restoration, please modify the benchmark path and model path and run
@@ -155,6 +160,8 @@ python test.py -opt=options/test.yml
 
 ### Gradio
 Here we provide an [app.py](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/daclip-sde/app.py) file for testing your own images. Before that, you need to download the pretrained weights ([DA-CLIP](https://drive.google.com/file/d/1A6u4CaVrcpcZckGUNzEXqMF8x_JXsZdX/view?usp=sharing) and [UIR](https://drive.google.com/file/d/1eXsyrmAbWOvhIY4Wbt5v4IxaggA5aZMG/view?usp=sharing)) and modify the model path in `options/test.yml`. Then by simply running `python app.py`, you can open `http://localhost:7860` to test the model. (We also provide several images with different degradations in the `images` dir). We also provide more examples from our test dataset in the [google drive](https://drive.google.com/file/d/1C1nmP5kJXzxrULxTMVWF5P30qezqP6kn/view?usp=sharing).
+
+**The same steps can be used for image restoration in the wild ([wild-ir](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/wild-ir)).**
 
 
 ### Results
@@ -172,6 +179,13 @@ Here we provide an [app.py](https://github.com/Algolzw/daclip-uir/tree/main/univ
 <summary><strong>Degradation-Specific Restoration</strong> (click to expand) </summary>
 
 ![daclip](figs/results_single.jpg)
+
+</details>
+
+<details>
+<summary><strong>Image Restoration in the wild</strong> (click to expand) </summary>
+
+![daclip](figs/results-wildir.jpg)
 
 </details>
 

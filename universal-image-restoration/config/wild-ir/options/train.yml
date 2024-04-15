@@ -23,9 +23,9 @@ degradation: # for some synthetic dataset that only have GTs
 datasets:
   train:
     name: Train_Dataset
-    mode: LQGT
-    dataroot_GT: /datasets/raim/train/GT_sharp
-    dataroot_LQ: /datasets/raim/train/LQ_sharp
+    mode: MDGT  # You can also pre-generate LQ-HQ pairs for training efficiency
+    dataroot_GT: /datasets/lsdir/train/GT_sharp
+    # dataroot_LQ: /datasets/lsdir/train/LQ_sharp
 
     use_shuffle: true
     n_workers: 16  # per GPU
@@ -37,8 +37,8 @@ datasets:
   val:
     name: Val_Dataset
     mode: LQGT
-    dataroot_GT: ~/datasets/raim/val-PhaseOneData/paired_1024/HR
-    dataroot_LQ: ~/datasets/raim/val-PhaseOneData/paired_1024/LR
+    dataroot_GT: ~/datasets/div2k/val/GT
+    dataroot_LQ: ~/datasets/div2k/val/LQ
     color: RGB
 
 #### network structures

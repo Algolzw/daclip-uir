@@ -7,7 +7,12 @@
 
 ![daclip](figs/teaser.jpg)
 
+Our follow-up work [Photo-Realistic Image Restoration in the Wild with Controlled Vision-Language Models](https://arxiv.org/abs/2404.09732) (CVPRW 2024) presents a [posterior sampling](https://github.com/Algolzw/daclip-uir/blob/74b7851827b485287971300e4b2a56ea0f8f1d75/universal-image-restoration/utils/sde_utils.py#L297) for better image generation and handles real-world mixed-degradation images similar to [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN).
+
+
+
 ### Updates
+[**2024.04.16**] Our follow-up paper "[Photo-Realistic Image Restoration in the Wild with Controlled Vision-Language Models](https://arxiv.org/abs/2404.09732)" is on [ArXiv](https://arxiv.org/abs/2404.09732) now! <br>
 [**2024.04.15**]  Updated a [wild-IR](https://github.com/Algolzw/daclip-uir/tree/main/universal-image-restoration/config/wild-ir) model for real-world degradations and the [posterior sampling](https://github.com/Algolzw/daclip-uir/blob/74b7851827b485287971300e4b2a56ea0f8f1d75/universal-image-restoration/utils/sde_utils.py#L297) for better image generation. The pretrained weights [wild-ir.pth](https://drive.google.com/file/d/1DqHL61gZJI-3EGsXPJrhERrrst7ZR6gP/view?usp=sharing) and [wild-daclip_ViT-L-14.pt](https://drive.google.com/file/d/1eVxgvwzwLl5oWSVIgnA2gycV6ewLEVJd/view?usp=sharing) are also provided for wild-ir. <br>
 [**2024.01.20**]  🎉🎉🎉 Our DA-CLIP paper was accepted by ICLR 2024 🎉🎉🎉 We further provide a more robust model in the [model card](https://huggingface.co/weblzw/daclip-uir-ViT-B-32-irsde/tree/main). <br>
 [**2023.10.25**] Added [dataset links](https://github.com/Algolzw/daclip-uir#dataset-links) for training and testing. <br>
@@ -216,6 +221,13 @@ The following are BibTeX references:
   author={Luo, Ziwei and Gustafsson, Fredrik K and Zhao, Zheng and Sj{\"o}lund, Jens and Sch{\"o}n, Thomas B},
   journal={arXiv preprint arXiv:2310.01018},
   year={2023}
+}
+
+@article{luo2024photo,
+  title={Photo-Realistic Image Restoration in the Wild with Controlled Vision-Language Models},
+  author={Luo, Ziwei and Gustafsson, Fredrik K and Zhao, Zheng and Sj{\"o}lund, Jens and Sch{\"o}n, Thomas B},
+  journal={arXiv preprint arXiv:2404.09732},
+  year={2024}
 }
 ```
 

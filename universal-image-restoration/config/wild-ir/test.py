@@ -68,14 +68,8 @@ for phase, dataset_opt in sorted(opt["datasets"].items()):
 model = create_model(opt)
 device = model.device
 
-# clip_model, _preprocess = clip.load("ViT-B/32", device=device)
-if opt['path']['daclip'] is not None:
-    clip_model, preprocess = open_clip.create_model_from_pretrained('daclip_ViT-B-32', pretrained=opt['path']['daclip'])
-else:
-    clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32', pretrained='laion2b_s34b_b79k')
-tokenizer = open_clip.get_tokenizer('ViT-B-32')
+clip_model, preprocess = open_clip.create_model_from_pretrained('daclip_ViT-L-14', pretrained=opt['path']['daclip'])
 clip_model = clip_model.to(device)
-
 
 sde = util.IRSDE(max_sigma=opt["sde"]["max_sigma"], T=opt["sde"]["T"], schedule=opt["sde"]["schedule"], eps=opt["sde"]["eps"], device=device)
 sde.set_model(model.model)

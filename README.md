@@ -137,7 +137,7 @@ cd universal-image-restoration/config/daclip-sde
 python3 train.py -opt=options/train.yml
 
 # For distributed training, need to change the gpu_ids in option file
-python3 -m torch.distributed.launch --nproc_per_node=2 --master_poer=4321 train.py -opt=options/train.yml --launcher pytorch
+python3 -m torch.distributed.launch --nproc_per_node=2 --master_port=4321 train.py -opt=options/train.yml --launcher pytorch
 ```
 
 The models and training logs will save in `log/universal-ir`. 
